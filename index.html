@@ -34,6 +34,13 @@
             overflow: hidden;
             border: 5px solid #ffd700;
             position: relative;
+            transition: filter 0.5s ease;
+        }
+        
+        .container.blurred {
+            filter: blur(8px);
+            pointer-events: none;
+            overflow: hidden;
         }
         
         header {
@@ -493,13 +500,138 @@
             white-space: nowrap;
         }
         
+        /* 年終獎金反推區塊 */
+        .reverse-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px 20px;
+            margin-top: 40px;
+            border: 4px solid #9b59b6;
+            box-shadow: 0 8px 20px rgba(155, 89, 182, 0.2);
+            position: relative;
+            width: 100%;
+        }
+        
+        .reverse-section::before {
+            content: "🔄 年終獎金反推考績";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to right, #9b59b6, #bf7fd9);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.3);
+            z-index: 2;
+            white-space: nowrap;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .reverse-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        @media (min-width: 480px) {
+            .reverse-group {
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+        
+        .reverse-label {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            font-weight: 700;
+            color: #9b59b6;
+            text-align: center;
+            width: 100%;
+        }
+        
+        #reverseBonus {
+            padding: 15px 20px;
+            font-size: clamp(1.4rem, 4vw, 1.8rem);
+            border: 3px solid #9b59b6;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 280px;
+            text-align: right;
+            transition: all 0.3s;
+            font-weight: 700;
+            color: #9b59b6;
+            background-color: #f9f0ff;
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.2) inset;
+        }
+        
+        #reverseBonus:focus {
+            border-color: #8e44ad;
+            box-shadow: 0 0 0 4px rgba(155, 89, 182, 0.2), 
+                        0 5px 15px rgba(155, 89, 182, 0.2) inset;
+            outline: none;
+            transform: scale(1.03);
+        }
+        
+        .reverse-result {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f9f0ff;
+            border-radius: 12px;
+            border: 3px dashed #9b59b6;
+            text-align: center;
+            display: none;
+        }
+        
+        .reverse-result.active {
+            display: block;
+        }
+        
+        .reverse-result-title {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 900;
+            color: #9b59b6;
+            margin-bottom: 15px;
+        }
+        
+        .reverse-result-content {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .reverse-result-detail {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .reverse-performance {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 900;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            min-width: 100px;
+        }
+        
         footer {
             text-align: center;
             padding: 20px;
             color: #da291c;
             font-size: clamp(0.9rem, 3vw, 1rem);
             border-top: 3px solid #ffd700;
-            margin-top: 30px;
+            margin-top: 40px;
             font-weight: 700;
             background-color: rgba(255, 215, 0, 0.1);
             width: 100%;
@@ -573,6 +705,117 @@
             width: 100%;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+        }
+        
+        /* 激勵視窗樣式 - 修復模糊問題 */
+        .motivation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .motivation-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .motivation-modal {
+            background: linear-gradient(145deg, #ffd700, #ffed4e);
+            border-radius: 30px;
+            padding: 50px 40px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+            border: 12px solid #da291c;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            position: relative;
+            z-index: 10001;
+        }
+        
+        .motivation-overlay.active .motivation-modal {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .motivation-title {
+            font-size: 2.8rem;
+            color: #da291c;
+            font-weight: 900;
+            margin-bottom: 40px;
+            text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.5);
+            line-height: 1.4;
+        }
+        
+        .motivation-button {
+            background: linear-gradient(to right, #da291c, #ff6b6b);
+            color: white;
+            border: none;
+            padding: 22px 50px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            border-radius: 60px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 15px 35px rgba(218, 41, 28, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .motivation-button:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(218, 41, 28, 0.7);
+        }
+        
+        .motivation-button:active {
+            transform: translateY(0);
+        }
+        
+        .motivation-emoji {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            display: block;
+        }
+        
+        /* 第二個視窗樣式 */
+        .second-modal {
+            display: none;
+        }
+        
+        /* 關閉按鈕 */
+        .close-button {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 2.8rem;
+            color: #da291c;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-weight: bold;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            z-index: 10002;
+        }
+        
+        .close-button:hover {
+            background-color: rgba(218, 41, 28, 0.1);
         }
     </style>
 </head>
@@ -663,6 +906,22 @@
                 </div>
             </div>
             
+            <!-- 新增：年終獎金反推考績區塊 -->
+            <div class="reverse-section">
+                <div class="reverse-group">
+                    <label for="reverseBonus" class="reverse-label">輸入年終獎金反推考績：</label>
+                    <input type="number" id="reverseBonus" value="0" min="0" step="1000" placeholder="輸入獎金自動計算">
+                    <span class="unit">元</span>
+                </div>
+                
+                <div class="reverse-result" id="reverseResult">
+                    <div class="reverse-result-title">考績分析結果</div>
+                    <div class="reverse-result-content" id="reverseResultContent">您的年終獎金對應的績效等級為：</div>
+                    <div id="reversePerformance"></div>
+                    <div class="reverse-result-detail" id="reverseResultDetail"></div>
+                </div>
+            </div>
+            
             <div class="formula-section">
                 <div class="formula-title">計算公式說明</div>
                 <p>年終獎金 = 120,000 + (2 × 底薪) + (績效係數 × 底薪) + 40,000</p>
@@ -670,12 +929,32 @@
                 <p>級距差 = 優等獎金 - 甲上獎金</p>
                 <p>調薪金額 = 底薪 × 3% + 700</p>
                 <p>調薪後薪資 = 底薪 + 調薪金額</p>
+                <p style="margin-top: 15px; color: #9b59b6; font-weight: 700;">反推公式：底薪 = (年終獎金 - 160,000) ÷ (2 + 績效係數)</p>
             </div>
         </div>
         
         <footer>
             <p>© 2026 發大財年終獎金試算工具 | 祝您財源滾滾，年終獎金領滿滿！</p>
         </footer>
+    </div>
+
+    <!-- 激勵視窗 - 移到container外面 -->
+    <div class="motivation-overlay" id="motivationOverlay">
+        <!-- 第一個視窗 -->
+        <div class="motivation-modal" id="firstModal">
+            <button class="close-button" id="closeFirstModal">×</button>
+            <span class="motivation-emoji">🤔</span>
+            <h2 class="motivation-title">想知道怎麼樣 超過45萬嗎？</h2>
+            <button class="motivation-button" id="nextButton">下一步</button>
+        </div>
+        
+        <!-- 第二個視窗 -->
+        <div class="motivation-modal second-modal" id="secondModal">
+            <button class="close-button" id="closeSecondModal">×</button>
+            <span class="motivation-emoji">💪</span>
+            <h2 class="motivation-title">那就努力成為授權人員吧～～～</h2>
+            <button class="motivation-button" id="encourageButton">加油</button>
+        </div>
     </div>
 
     <script>
@@ -695,12 +974,44 @@
         const newSalary = document.getElementById('new-salary');
         const newSalaryChinese = document.getElementById('new-salary-chinese');
         
+        // 激勵視窗元素
+        const motivationOverlay = document.getElementById('motivationOverlay');
+        const firstModal = document.getElementById('firstModal');
+        const secondModal = document.getElementById('secondModal');
+        const nextButton = document.getElementById('nextButton');
+        const encourageButton = document.getElementById('encourageButton');
+        const closeFirstModal = document.getElementById('closeFirstModal');
+        const closeSecondModal = document.getElementById('closeSecondModal');
+        
+        // 反推功能元素
+        const reverseBonusInput = document.getElementById('reverseBonus');
+        const reverseResult = document.getElementById('reverseResult');
+        const reverseResultContent = document.getElementById('reverseResultContent');
+        const reversePerformance = document.getElementById('reversePerformance');
+        const reverseResultDetail = document.getElementById('reverseResultDetail');
+        
         // 績效係數
         const coefficients = {
             excellent: 5.26,
             great: 4.96,
             good: 4.66,
             fair: 4.36
+        };
+        
+        // 績效等級名稱
+        const performanceNames = {
+            excellent: "優",
+            great: "甲上",
+            good: "甲",
+            fair: "甲下"
+        };
+        
+        // 績效等級顏色類別
+        const performanceGradeClasses = {
+            excellent: "grade-excellent",
+            great: "grade-great",
+            good: "grade-good",
+            fair: "grade-fair"
         };
         
         // 格式化數字為千分位
@@ -778,6 +1089,111 @@
             return { adjustment, newSalary };
         }
         
+        // 顯示激勵視窗
+        function showMotivationModal() {
+            // 模糊container而不是整個body
+            const container = document.querySelector('.container');
+            container.classList.add('blurred');
+            
+            // 顯示第一個視窗
+            setTimeout(() => {
+                motivationOverlay.classList.add('active');
+                firstModal.style.display = 'block';
+                secondModal.style.display = 'none';
+            }, 500);
+        }
+        
+        // 隱藏激勵視窗
+        function hideMotivationModal() {
+            motivationOverlay.classList.remove('active');
+            const container = document.querySelector('.container');
+            setTimeout(() => {
+                container.classList.remove('blurred');
+            }, 500);
+        }
+        
+        // 檢查是否需要顯示激勵視窗
+        function checkForMotivation(baseSalary) {
+            // 清除之前的計時器
+            if (window.motivationTimer) {
+                clearTimeout(window.motivationTimer);
+                window.motivationTimer = null;
+            }
+            
+            // 如果底薪小於40000，5秒後顯示激勵視窗
+            if (baseSalary < 40000) {
+                window.motivationTimer = setTimeout(() => {
+                    showMotivationModal();
+                }, 5000);
+            }
+        }
+        
+        // 年終獎金反推考績功能
+        function reverseCalculatePerformance() {
+            const bonus = parseFloat(reverseBonusInput.value) || 0;
+            
+            // 如果輸入為0或空，隱藏結果
+            if (bonus === 0) {
+                reverseResult.classList.remove('active');
+                return;
+            }
+            
+            if (bonus < 160000) {
+                reverseResultContent.textContent = `年終獎金 ${formatNumber(bonus)} 元 低於最低獎金 160,000 元`;
+                reversePerformance.innerHTML = '<span class="reverse-performance" style="background-color: #ffcccc; color: #cc0000;">無對應考績</span>';
+                reverseResultDetail.textContent = "獎金過低，無法對應到任何績效等級。";
+                reverseResult.classList.add('active');
+                return;
+            }
+            
+            // 計算每個績效等級所需的底薪
+            let results = [];
+            
+            for (const [grade, coefficient] of Object.entries(coefficients)) {
+                // 公式：底薪 = (獎金 - 160,000) / (2 + 績效係數)
+                const baseSalaryRequired = (bonus - 160000) / (2 + coefficient);
+                
+                // 只保留合理的底薪（正數且不大於100萬）
+                if (baseSalaryRequired > 0 && baseSalaryRequired <= 1000000) {
+                    results.push({
+                        grade: grade,
+                        gradeName: performanceNames[grade],
+                        gradeClass: performanceGradeClasses[grade],
+                        coefficient: coefficient,
+                        baseSalaryRequired: baseSalaryRequired,
+                        difference: Math.abs(baseSalaryRequired - 50000) // 與預設底薪5萬的差距
+                    });
+                }
+            }
+            
+            if (results.length === 0) {
+                reverseResultContent.textContent = `年終獎金 ${formatNumber(bonus)} 元 無法對應到合理的考績`;
+                reversePerformance.innerHTML = '<span class="reverse-performance" style="background-color: #ffcccc; color: #cc0000;">無對應考績</span>';
+                reverseResultDetail.textContent = "請確認輸入金額是否正確，或嘗試其他金額。";
+                reverseResult.classList.add('active');
+                return;
+            }
+            
+            // 按照與預設底薪5萬的差距排序，找出最接近的
+            results.sort((a, b) => a.difference - b.difference);
+            
+            const bestMatch = results[0];
+            const bestMatchSalary = Math.round(bestMatch.baseSalaryRequired);
+            
+            // 顯示結果 - 只顯示最佳匹配，不顯示其他可能考績
+            reverseResultContent.textContent = `年終獎金 ${formatNumber(bonus)} 元 (${formatChineseNumber(bonus)}) 對應的考績為：`;
+            
+            reversePerformance.innerHTML = `
+                <span class="performance-grade ${bestMatch.gradeClass}">${bestMatch.gradeName}</span>
+            `;
+            
+            let detailText = `績效係數: ${bestMatch.coefficient}<br>`;
+            detailText += `所需底薪: ${formatNumber(bestMatchSalary)} 元 (${formatChineseNumber(bestMatchSalary)})<br>`;
+            
+            reverseResultDetail.innerHTML = detailText;
+            reverseResult.classList.add('active');
+        }
+        
         // 更新所有計算結果
         function updateCalculations() {
             const baseSalary = parseFloat(baseSalaryInput.value) || 0;
@@ -824,6 +1240,9 @@
                 baseSalaryInput.style.borderColor = "#ffd700";
                 baseSalaryInput.style.backgroundColor = "#fffdf6";
             }
+            
+            // 檢查是否需要顯示激勵視窗
+            checkForMotivation(baseSalary);
         }
         
         // 初始化：設置預設底薪為50000並計算
@@ -832,36 +1251,35 @@
         // 監聽輸入變化
         baseSalaryInput.addEventListener('input', updateCalculations);
         
-        // 添加動畫效果：當數字變化時添加高亮效果
-        function highlightChange(element) {
-            element.style.transition = "all 0.3s";
-            element.style.color = "#ff8c00";
-            element.style.transform = "scale(1.1)";
-            
-            setTimeout(() => {
-                element.style.color = "";
-                element.style.transform = "";
-            }, 500);
-        }
+        // 反推功能事件處理 - 輸入時自動計算
+        reverseBonusInput.addEventListener('input', function() {
+            // 使用防抖技術，避免頻繁計算
+            clearTimeout(reverseBonusInput.timer);
+            reverseBonusInput.timer = setTimeout(reverseCalculatePerformance, 300);
+        });
         
-        // 監聽輸入變化並添加高亮效果
-        let prevBaseSalary = baseSalaryInput.value;
-        baseSalaryInput.addEventListener('input', function() {
-            if (this.value !== prevBaseSalary) {
-                // 更新所有顯示的數字並添加高亮效果
-                const bonusElements = [bonusExcellent, bonusGreat, bonusGood, bonusFair];
-                const chineseElements = [bonusExcellentChinese, bonusGreatChinese, bonusGoodChinese, bonusFairChinese];
-                const adjustmentElements = [adjustmentAmount, newSalary];
-                const adjustmentChineseElements = [adjustmentAmountChinese, newSalaryChinese];
-                
-                bonusElements.forEach(el => highlightChange(el));
-                chineseElements.forEach(el => highlightChange(el));
-                adjustmentElements.forEach(el => highlightChange(el));
-                adjustmentChineseElements.forEach(el => highlightChange(el));
-                
-                highlightChange(differenceValue);
-                
-                prevBaseSalary = this.value;
+        // 激勵視窗事件處理
+        nextButton.addEventListener('click', function() {
+            firstModal.style.display = 'none';
+            secondModal.style.display = 'block';
+        });
+        
+        encourageButton.addEventListener('click', function() {
+            hideMotivationModal();
+        });
+        
+        closeFirstModal.addEventListener('click', function() {
+            hideMotivationModal();
+        });
+        
+        closeSecondModal.addEventListener('click', function() {
+            hideMotivationModal();
+        });
+        
+        // 點擊遮罩層也可以關閉視窗
+        motivationOverlay.addEventListener('click', function(e) {
+            if (e.target === motivationOverlay) {
+                hideMotivationModal();
             }
         });
         
@@ -881,4 +1299,4 @@
         });
     </script>
 </body>
-</html>
+                                    </html>
