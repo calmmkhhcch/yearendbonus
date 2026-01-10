@@ -614,6 +614,13 @@
             margin-top: 10px;
         }
         
+        .reverse-performance-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
         .reverse-performance {
             display: inline-block;
             padding: 10px 20px;
@@ -621,8 +628,35 @@
             font-weight: 900;
             font-size: clamp(1.2rem, 3vw, 1.5rem);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            margin: 10px;
+            margin: 5px;
             min-width: 100px;
+            text-align: center;
+            cursor: default; /* 改為預設游標，表示不可點擊 */
+        }
+        
+        /* 反推結果中的績效等級樣式 - 與上方表格一致 */
+        .reverse-excellent {
+            background: linear-gradient(to right, #ffd700, #ffed4e);
+            color: #b8860b;
+            border: 3px solid #ffd700;
+        }
+        
+        .reverse-great {
+            background: linear-gradient(to right, #c0c0c0, #e8e8e8);
+            color: #696969;
+            border: 3px solid #c0c0c0;
+        }
+        
+        .reverse-good {
+            background: linear-gradient(to right, #27ae60, #2ecc71);
+            color: white;
+            border: 3px solid #219653;
+        }
+        
+        .reverse-fair {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            border: 3px solid #1c6ea4;
         }
         
         footer {
@@ -792,31 +826,6 @@
         .second-modal {
             display: none;
         }
-        
-        /* 關閉按鈕 */
-        .close-button {
-            position: absolute;
-            top: 20px;
-            right: 25px;
-            font-size: 2.8rem;
-            color: #da291c;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-weight: bold;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background-color 0.3s;
-            z-index: 10002;
-        }
-        
-        .close-button:hover {
-            background-color: rgba(218, 41, 28, 0.1);
-        }
     </style>
 </head>
 <body>
@@ -830,7 +839,7 @@
             <div class="input-section">
                 <div class="input-group">
                     <label for="baseSalary" class="input-label">輸入你的底薪：</label>
-                    <input type="number" id="baseSalary" value="50000" min="0" step="1000">
+                    <input type="number" id="baseSalary" min="0" step="1000" placeholder="請輸入底薪">
                     <span class="unit">元</span>
                 </div>
                 <p style="margin-top: 15px; color: #b8860b; font-size: 0.95rem; text-align: center; font-weight: 600; word-wrap: break-word;">輸入底薪，馬上計算你的年終獎金，準備發大財！</p>
@@ -916,8 +925,8 @@
                 
                 <div class="reverse-result" id="reverseResult">
                     <div class="reverse-result-title">考績分析結果</div>
-                    <div class="reverse-result-content" id="reverseResultContent">您的年終獎金對應的績效等級為：</div>
-                    <div id="reversePerformance"></div>
+                    <div class="reverse-result-content" id="reverseResultContent"></div>
+                    <div id="reversePerformanceContainer" class="reverse-performance-container"></div>
                     <div class="reverse-result-detail" id="reverseResultDetail"></div>
                 </div>
             </div>
@@ -930,6 +939,7 @@
                 <p>調薪金額 = 底薪 × 3% + 700</p>
                 <p>調薪後薪資 = 底薪 + 調薪金額</p>
                 <p style="margin-top: 15px; color: #9b59b6; font-weight: 700;">反推公式：底薪 = (年終獎金 - 160,000) ÷ (2 + 績效係數)</p>
+                <p style="color: #da291c; font-weight: 700;">註：正向計算與反推計算均使用四捨五入至整數</p>
             </div>
         </div>
         
@@ -942,7 +952,6 @@
     <div class="motivation-overlay" id="motivationOverlay">
         <!-- 第一個視窗 -->
         <div class="motivation-modal" id="firstModal">
-            <button class="close-button" id="closeFirstModal">×</button>
             <span class="motivation-emoji">🤔</span>
             <h2 class="motivation-title">想知道怎麼樣 超過45萬嗎？</h2>
             <button class="motivation-button" id="nextButton">下一步</button>
@@ -950,7 +959,6 @@
         
         <!-- 第二個視窗 -->
         <div class="motivation-modal second-modal" id="secondModal">
-            <button class="close-button" id="closeSecondModal">×</button>
             <span class="motivation-emoji">💪</span>
             <h2 class="motivation-title">那就努力成為授權人員吧～～～</h2>
             <button class="motivation-button" id="encourageButton">加油</button>
@@ -980,14 +988,12 @@
         const secondModal = document.getElementById('secondModal');
         const nextButton = document.getElementById('nextButton');
         const encourageButton = document.getElementById('encourageButton');
-        const closeFirstModal = document.getElementById('closeFirstModal');
-        const closeSecondModal = document.getElementById('closeSecondModal');
         
         // 反推功能元素
         const reverseBonusInput = document.getElementById('reverseBonus');
         const reverseResult = document.getElementById('reverseResult');
         const reverseResultContent = document.getElementById('reverseResultContent');
-        const reversePerformance = document.getElementById('reversePerformance');
+        const reversePerformanceContainer = document.getElementById('reversePerformanceContainer');
         const reverseResultDetail = document.getElementById('reverseResultDetail');
         
         // 績效係數
@@ -1006,13 +1012,17 @@
             fair: "甲下"
         };
         
-        // 績效等級顏色類別
-        const performanceGradeClasses = {
-            excellent: "grade-excellent",
-            great: "grade-great",
-            good: "grade-good",
-            fair: "grade-fair"
+        // 績效等級顏色類別（反推用）
+        const reversePerformanceClasses = {
+            excellent: "reverse-excellent",
+            great: "reverse-great",
+            good: "reverse-good",
+            fair: "reverse-fair"
         };
+        
+        // 計時器變數
+        let motivationTimer = null;
+        let reverseMotivationTimer = null;
         
         // 格式化數字為千分位
         function formatNumber(num) {
@@ -1074,19 +1084,23 @@
             return result + "元";
         }
         
-        // 計算年終獎金
+        // 計算年終獎金（四捨五入至整數）
         function calculateBonus(baseSalary, coefficient) {
             // 公式: 120000 + 2*底薪 + 係數*底薪 + 40000
             // 簡化: 160000 + (2+係數)*底薪
-            return 160000 + (2 + coefficient) * baseSalary;
+            const bonus = 160000 + (2 + coefficient) * baseSalary;
+            return Math.round(bonus); // 四捨五入至整數
         }
         
-        // 計算調薪
+        // 計算調薪（四捨五入至整數）
         function calculateSalaryAdjustment(baseSalary) {
             // 調薪 = 底薪 * 0.03 + 700
             const adjustment = baseSalary * 0.03 + 700;
             const newSalary = baseSalary + adjustment;
-            return { adjustment, newSalary };
+            return { 
+                adjustment: Math.round(adjustment), // 四捨五入至整數
+                newSalary: Math.round(newSalary)     // 四捨五入至整數
+            };
         }
         
         // 顯示激勵視窗
@@ -1112,25 +1126,47 @@
             }, 500);
         }
         
-        // 檢查是否需要顯示激勵視窗
+        // 檢查是否需要顯示激勵視窗（正向計算）
         function checkForMotivation(baseSalary) {
             // 清除之前的計時器
-            if (window.motivationTimer) {
-                clearTimeout(window.motivationTimer);
-                window.motivationTimer = null;
+            if (motivationTimer) {
+                clearTimeout(motivationTimer);
+                motivationTimer = null;
             }
             
             // 如果底薪小於40000，5秒後顯示激勵視窗
             if (baseSalary < 40000) {
-                window.motivationTimer = setTimeout(() => {
+                motivationTimer = setTimeout(() => {
                     showMotivationModal();
                 }, 5000);
             }
         }
         
-        // 年終獎金反推考績功能
+        // 檢查是否需要顯示激勵視窗（反推計算）
+        function checkReverseMotivation(baseSalary) {
+            // 清除之前的計時器
+            if (reverseMotivationTimer) {
+                clearTimeout(reverseMotivationTimer);
+                reverseMotivationTimer = null;
+            }
+            
+            // 如果底薪小於40000，5秒後顯示激勵視窗
+            if (baseSalary < 40000) {
+                reverseMotivationTimer = setTimeout(() => {
+                    showMotivationModal();
+                }, 5000);
+            }
+        }
+        
+        // 年終獎金反推考績功能（使用四捨五入）
         function reverseCalculatePerformance() {
             const bonus = parseFloat(reverseBonusInput.value) || 0;
+            
+            // 清除反向計算的激勵計時器
+            if (reverseMotivationTimer) {
+                clearTimeout(reverseMotivationTimer);
+                reverseMotivationTimer = null;
+            }
             
             // 如果輸入為0或空，隱藏結果
             if (bonus === 0) {
@@ -1138,9 +1174,10 @@
                 return;
             }
             
+            // 由於正向計算使用四捨五入，最小獎金為160,000四捨五入後仍是160,000
             if (bonus < 160000) {
                 reverseResultContent.textContent = `年終獎金 ${formatNumber(bonus)} 元 低於最低獎金 160,000 元`;
-                reversePerformance.innerHTML = '<span class="reverse-performance" style="background-color: #ffcccc; color: #cc0000;">無對應考績</span>';
+                reversePerformanceContainer.innerHTML = '<span class="reverse-performance" style="background-color: #ffcccc; color: #cc0000;">無對應考績</span>';
                 reverseResultDetail.textContent = "獎金過低，無法對應到任何績效等級。";
                 reverseResult.classList.add('active');
                 return;
@@ -1151,46 +1188,105 @@
             
             for (const [grade, coefficient] of Object.entries(coefficients)) {
                 // 公式：底薪 = (獎金 - 160,000) / (2 + 績效係數)
-                const baseSalaryRequired = (bonus - 160000) / (2 + coefficient);
+                // 但我們需要考慮四捨五入，所以我們要找到一個底薪，使得 calculateBonus(底薪, 係數) 等於輸入的獎金
                 
-                // 只保留合理的底薪（正數且不大於100萬）
-                if (baseSalaryRequired > 0 && baseSalaryRequired <= 1000000) {
+                // 先計算精確底薪
+                const exactBaseSalary = (bonus - 160000) / (2 + coefficient);
+                
+                // 測試底薪的整數範圍（考慮四捨五入的影響）
+                const minBaseSalary = Math.max(0, Math.floor(exactBaseSalary) - 100);
+                const maxBaseSalary = Math.ceil(exactBaseSalary) + 100;
+                
+                // 在合理範圍內尋找匹配的底薪
+                for (let testSalary = minBaseSalary; testSalary <= maxBaseSalary; testSalary++) {
+                    const calculatedBonus = calculateBonus(testSalary, coefficient);
+                    
+                    if (calculatedBonus === bonus) {
+                        // 找到匹配的底薪
+                        results.push({
+                            grade: grade,
+                            gradeName: performanceNames[grade],
+                            gradeClass: reversePerformanceClasses[grade],
+                            coefficient: coefficient,
+                            baseSalaryRequired: testSalary,
+                            calculatedBonus: calculatedBonus,
+                            exactMatch: true
+                        });
+                        break; // 找到第一個匹配就跳出
+                    }
+                }
+                
+                // 如果沒有找到完全匹配，計算最接近的底薪
+                if (results.length === 0 || results[results.length - 1].grade !== grade) {
+                    // 計算最接近的整數底薪
+                    const roundedSalary = Math.round(exactBaseSalary);
+                    const calculatedBonus = calculateBonus(roundedSalary, coefficient);
+                    const difference = Math.abs(calculatedBonus - bonus);
+                    
                     results.push({
                         grade: grade,
                         gradeName: performanceNames[grade],
-                        gradeClass: performanceGradeClasses[grade],
+                        gradeClass: reversePerformanceClasses[grade],
                         coefficient: coefficient,
-                        baseSalaryRequired: baseSalaryRequired,
-                        difference: Math.abs(baseSalaryRequired - 50000) // 與預設底薪5萬的差距
+                        baseSalaryRequired: roundedSalary,
+                        calculatedBonus: calculatedBonus,
+                        difference: difference,
+                        exactMatch: false
                     });
                 }
             }
             
             if (results.length === 0) {
                 reverseResultContent.textContent = `年終獎金 ${formatNumber(bonus)} 元 無法對應到合理的考績`;
-                reversePerformance.innerHTML = '<span class="reverse-performance" style="background-color: #ffcccc; color: #cc0000;">無對應考績</span>';
+                reversePerformanceContainer.innerHTML = '<span class="reverse-performance" style="background-color: #ffcccc; color: #cc0000;">無對應考績</span>';
                 reverseResultDetail.textContent = "請確認輸入金額是否正確，或嘗試其他金額。";
                 reverseResult.classList.add('active');
                 return;
             }
             
-            // 按照與預設底薪5萬的差距排序，找出最接近的
-            results.sort((a, b) => a.difference - b.difference);
+            // 按照是否完全匹配和誤差大小排序
+            results.sort((a, b) => {
+                // 完全匹配優先
+                if (a.exactMatch && !b.exactMatch) return -1;
+                if (!a.exactMatch && b.exactMatch) return 1;
+                
+                // 然後按誤差排序
+                const diffA = a.difference || 0;
+                const diffB = b.difference || 0;
+                return diffA - diffB;
+            });
             
             const bestMatch = results[0];
-            const bestMatchSalary = Math.round(bestMatch.baseSalaryRequired);
             
-            // 顯示結果 - 只顯示最佳匹配，不顯示其他可能考績
-            reverseResultContent.textContent = `年終獎金 ${formatNumber(bonus)} 元 (${formatChineseNumber(bonus)}) 對應的考績為：`;
+            // 檢查是否需要顯示激勵視窗（反向計算）
+            checkReverseMotivation(bestMatch.baseSalaryRequired);
             
-            reversePerformance.innerHTML = `
-                <span class="performance-grade ${bestMatch.gradeClass}">${bestMatch.gradeName}</span>
+            // 顯示單一結果
+            reverseResultContent.textContent = `您的年終獎金 ${formatNumber(bonus)} 元 對應的績效等級為：`;
+            
+            // 顯示單一績效等級（不可點擊）
+            const performanceHTML = `
+                <div class="reverse-performance ${bestMatch.gradeClass}">
+                    ${bestMatch.gradeName}
+                    ${bestMatch.exactMatch ? ' ✓' : ''}
+                </div>
             `;
             
-            let detailText = `績效係數: ${bestMatch.coefficient}<br>`;
-            detailText += `所需底薪: ${formatNumber(bestMatchSalary)} 元 (${formatChineseNumber(bestMatchSalary)})<br>`;
+            reversePerformanceContainer.innerHTML = performanceHTML;
             
-            reverseResultDetail.innerHTML = detailText;
+            // 顯示詳細資訊（移除點擊相關提示）
+            let detailHTML = `<p><strong>績效等級：${bestMatch.gradeName}</strong></p>`;
+            detailHTML += `<p>績效係數：${bestMatch.coefficient}</p>`;
+            detailHTML += `<p>所需底薪：${formatNumber(bestMatch.baseSalaryRequired)} 元 (${formatChineseNumber(bestMatch.baseSalaryRequired)})</p>`;
+            detailHTML += `<p>計算獎金：${formatNumber(bestMatch.calculatedBonus)} 元</p>`;
+            
+            if (bestMatch.exactMatch) {
+                detailHTML += `<p style="color: #27ae60; font-weight: bold;">✓ 完全匹配</p>`;
+            } else {
+                detailHTML += `<p style="color: #e74c3c;">誤差：${formatNumber(bestMatch.difference)} 元</p>`;
+            }
+            
+            reverseResultDetail.innerHTML = detailHTML;
             reverseResult.classList.add('active');
         }
         
@@ -1198,7 +1294,13 @@
         function updateCalculations() {
             const baseSalary = parseFloat(baseSalaryInput.value) || 0;
             
-            // 計算各績效等級的年終獎金
+            // 清除正向計算的激勵計時器
+            if (motivationTimer) {
+                clearTimeout(motivationTimer);
+                motivationTimer = null;
+            }
+            
+            // 計算各績效等級的年終獎金（四捨五入）
             const bonusExcellentValue = calculateBonus(baseSalary, coefficients.excellent);
             const bonusGreatValue = calculateBonus(baseSalary, coefficients.great);
             const bonusGoodValue = calculateBonus(baseSalary, coefficients.good);
@@ -1221,7 +1323,7 @@
             const difference = bonusExcellentValue - bonusGreatValue;
             differenceValue.textContent = `${formatNumber(difference)} 元`;
             
-            // 計算調薪
+            // 計算調薪（四捨五入）
             const { adjustment, newSalary: adjustedSalary } = calculateSalaryAdjustment(baseSalary);
             
             // 更新調薪金額顯示
@@ -1241,11 +1343,19 @@
                 baseSalaryInput.style.backgroundColor = "#fffdf6";
             }
             
-            // 檢查是否需要顯示激勵視窗
+            // 檢查是否需要顯示激勵視窗（正向計算）
             checkForMotivation(baseSalary);
+            
+            // 更新反推輸入框的值（如果反推結果有顯示）
+            if (reverseResult.classList.contains('active')) {
+                // 找出當前底薪對應的獎金（優等）
+                const currentBonus = calculateBonus(baseSalary, coefficients.excellent);
+                reverseBonusInput.value = currentBonus;
+                reverseCalculatePerformance();
+            }
         }
         
-        // 初始化：設置預設底薪為50000並計算
+        // 初始化計算
         updateCalculations();
         
         // 監聽輸入變化
@@ -1266,20 +1376,14 @@
         
         encourageButton.addEventListener('click', function() {
             hideMotivationModal();
-        });
-        
-        closeFirstModal.addEventListener('click', function() {
-            hideMotivationModal();
-        });
-        
-        closeSecondModal.addEventListener('click', function() {
-            hideMotivationModal();
-        });
-        
-        // 點擊遮罩層也可以關閉視窗
-        motivationOverlay.addEventListener('click', function(e) {
-            if (e.target === motivationOverlay) {
-                hideMotivationModal();
+            // 清除兩個計時器
+            if (motivationTimer) {
+                clearTimeout(motivationTimer);
+                motivationTimer = null;
+            }
+            if (reverseMotivationTimer) {
+                clearTimeout(reverseMotivationTimer);
+                reverseMotivationTimer = null;
             }
         });
         
@@ -1299,4 +1403,4 @@
         });
     </script>
 </body>
-                                    </html>
+</html>
