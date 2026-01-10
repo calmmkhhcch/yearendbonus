@@ -741,6 +741,96 @@
             -webkit-overflow-scrolling: touch;
         }
         
+        /* 初始彈出視窗樣式 */
+        .initial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .initial-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .initial-modal {
+            background: linear-gradient(145deg, #ffd700, #ffed4e);
+            border-radius: 30px;
+            padding: 50px 40px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+            border: 12px solid #da291c;
+            transform: scale(1);
+            opacity: 1;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            position: relative;
+            z-index: 10001;
+        }
+        
+        .initial-title {
+            font-size: 2.5rem;
+            color: #da291c;
+            font-weight: 900;
+            margin-bottom: 40px;
+            text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.5);
+            line-height: 1.4;
+        }
+        
+        .initial-message {
+            font-size: 1.8rem;
+            color: #da291c;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .initial-button {
+            background: linear-gradient(to right, #da291c, #ff6b6b);
+            color: white;
+            border: none;
+            padding: 22px 50px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            border-radius: 60px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 15px 35px rgba(218, 41, 28, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .initial-button:disabled {
+            background: linear-gradient(to right, #999, #ccc);
+            cursor: not-allowed;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .initial-button:not(:disabled):hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(218, 41, 28, 0.7);
+        }
+        
+        .initial-button:not(:disabled):active {
+            transform: translateY(0);
+        }
+        
+        .initial-emoji {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            display: block;
+        }
+        
         /* 激勵視窗樣式 - 修復模糊問題 */
         .motivation-overlay {
             position: fixed;
@@ -829,7 +919,18 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- 初始彈出視窗 -->
+    <div class="initial-overlay" id="initialOverlay">
+        <div class="initial-modal" id="initialModal">
+            <span class="initial-emoji">🎉</span>
+            <h2 class="initial-title">祝各位新年快樂，發大財！</h2>
+            <div class="initial-message">網頁為娛樂屬性，僅供參考<br>數據來源為AI自行模擬 😂</div>
+            <button class="initial-button" id="initialButton" disabled>已瞭解 (3)</button>
+        </div>
+    </div>
+
+    <!-- 主要內容容器 -->
+    <div class="container" id="mainContainer" style="display: none;">
         <header>
             <h1>2026發大財年終獎金試算</h1>
             <p class="subtitle">輸入底薪，立即計算你的年終獎金，一起發大財！<span class="money-emoji">💰💰💰</span></p>
@@ -966,6 +1067,11 @@
     </div>
 
     <script>
+        // 初始彈出視窗元素
+        const initialOverlay = document.getElementById('initialOverlay');
+        const initialButton = document.getElementById('initialButton');
+        const mainContainer = document.getElementById('mainContainer');
+        
         // 獲取DOM元素
         const baseSalaryInput = document.getElementById('baseSalary');
         const bonusExcellent = document.getElementById('bonus-excellent');
@@ -1023,6 +1129,39 @@
         // 計時器變數
         let motivationTimer = null;
         let reverseMotivationTimer = null;
+        let initialCountdownTimer = null;
+        let initialCountdown = 3; // 3秒倒數
+        
+        // 初始彈出視窗倒數計時功能
+        function startInitialCountdown() {
+            // 更新按鈕文字
+            initialButton.textContent = `已瞭解 (${initialCountdown})`;
+            
+            // 每秒更新一次
+            initialCountdownTimer = setInterval(() => {
+                initialCountdown--;
+                
+                if (initialCountdown <= 0) {
+                    // 倒數結束，啟用按鈕
+                    clearInterval(initialCountdownTimer);
+                    initialButton.textContent = "已瞭解";
+                    initialButton.disabled = false;
+                } else {
+                    // 更新按鈕文字
+                    initialButton.textContent = `已瞭解 (${initialCountdown})`;
+                }
+            }, 1000);
+        }
+        
+        // 關閉初始彈出視窗
+        function closeInitialOverlay() {
+            initialOverlay.classList.add('hidden');
+            
+            // 等待過渡動畫完成後顯示主容器
+            setTimeout(() => {
+                mainContainer.style.display = 'block';
+            }, 500);
+        }
         
         // 格式化數字為千分位
         function formatNumber(num) {
@@ -1355,51 +1494,59 @@
             }
         }
         
-        // 初始化計算
-        updateCalculations();
+        // 事件監聽器設定
+        function setupEventListeners() {
+            // 監聽底薪輸入變化
+            baseSalaryInput.addEventListener('input', updateCalculations);
+            
+            // 反推功能事件處理 - 輸入時自動計算
+            reverseBonusInput.addEventListener('input', function() {
+                // 使用防抖技術，避免頻繁計算
+                clearTimeout(reverseBonusInput.timer);
+                reverseBonusInput.timer = setTimeout(reverseCalculatePerformance, 300);
+            });
+            
+            // 激勵視窗事件處理
+            nextButton.addEventListener('click', function() {
+                firstModal.style.display = 'none';
+                secondModal.style.display = 'block';
+            });
+            
+            encourageButton.addEventListener('click', function() {
+                hideMotivationModal();
+                // 清除兩個計時器
+                if (motivationTimer) {
+                    clearTimeout(motivationTimer);
+                    motivationTimer = null;
+                }
+                if (reverseMotivationTimer) {
+                    clearTimeout(reverseMotivationTimer);
+                    reverseMotivationTimer = null;
+                }
+            });
+        }
         
-        // 監聽輸入變化
-        baseSalaryInput.addEventListener('input', updateCalculations);
-        
-        // 反推功能事件處理 - 輸入時自動計算
-        reverseBonusInput.addEventListener('input', function() {
-            // 使用防抖技術，避免頻繁計算
-            clearTimeout(reverseBonusInput.timer);
-            reverseBonusInput.timer = setTimeout(reverseCalculatePerformance, 300);
-        });
-        
-        // 激勵視窗事件處理
-        nextButton.addEventListener('click', function() {
-            firstModal.style.display = 'none';
-            secondModal.style.display = 'block';
-        });
-        
-        encourageButton.addEventListener('click', function() {
-            hideMotivationModal();
-            // 清除兩個計時器
-            if (motivationTimer) {
-                clearTimeout(motivationTimer);
-                motivationTimer = null;
-            }
-            if (reverseMotivationTimer) {
-                clearTimeout(reverseMotivationTimer);
-                reverseMotivationTimer = null;
-            }
-        });
-        
-        // 確保頁面載入時正確顯示
+        // 頁面載入時執行
         window.addEventListener('load', function() {
-            updateCalculations();
-            // 強制重排以確保正確渲染
-            document.body.style.display = 'none';
-            document.body.offsetHeight; // 觸發重排
-            document.body.style.display = '';
-        });
-        
-        // 處理手機旋轉
-        window.addEventListener('orientationchange', function() {
-            // 給瀏覽器一點時間完成旋轉
-            setTimeout(updateCalculations, 100);
+            // 開始初始彈出視窗的倒數計時
+            startInitialCountdown();
+            
+            // 設定初始按鈕點擊事件
+            initialButton.addEventListener('click', function() {
+                if (!initialButton.disabled) {
+                    closeInitialOverlay();
+                    
+                    // 初始化主要功能
+                    updateCalculations();
+                    setupEventListeners();
+                }
+            });
+            
+            // 處理手機旋轉
+            window.addEventListener('orientationchange', function() {
+                // 給瀏覽器一點時間完成旋轉
+                setTimeout(updateCalculations, 100);
+            });
         });
     </script>
 </body>
